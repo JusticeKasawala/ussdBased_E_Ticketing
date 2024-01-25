@@ -1,0 +1,30 @@
+{
+  "name": "ussd_app",
+  "version": "1.0.0",
+  "description": "E_Ticketing App developed by Fouth year unima computer science students",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JusticeKasawala/ussdBased_E_Ticketing.git"
+  },
+  "keywords": [
+    "E_ticketing"
+  ],
+  "author": "Gawani Justice Kasawala,Thoko,Gracious",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JusticeKasawala/ussdBased_E_Ticketing/issues"
+  },
+  "homepage": "https://github.com/JusticeKasawala/ussdBased_E_Ticketing#readme",
+  "dependencies": {
+    "africastalking": "^0.6.6",
+    "axios": "^1.6.5",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.3",
+    "save": "^2.9.0"
+  }
+}
