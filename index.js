@@ -80,39 +80,51 @@ app.post('/authenticate-admin', authenticateAdmin, (req, res) => {
 
 
 app.use("/", ussdRouter(app, io)); 
+function authenticate(req, res, next) {
+  if (req.session && req.session.adminId) {
+    // User is authenticated, allow access to the next middleware or route handler
+    next();
+  } else {
+    // User is not authenticated, redirect to login page or show an error
+    res.redirect('/login'); // Redirect to your login page
+  }
+}
+
 
 app.get('/', (req, res) => {
   res.render('login', { title: 'Home Page' });
 });
 app.get('/login', (req, res) => {
   res.render('index', { title: 'Home Page' });
-});
-app.get('/index', (req, res) => {
-  res.render('index', { title: 'homepage' });
-});
-app.get('/signup', (req, res) => {
-  res.render('signup', { title: 'sign up' });
-});
-app.get('/profile', (req, res) => {
-  res.render('profile', { title: 'Profile' });
+  
 });
 app.get('/register', (req, res) => {
   res.render('register', { title: 'register' });
 });
+app.get('/index', authenticate, (req, res) => {
+  res.render('index', { title: 'homepage' });
+});
 
+app.get('/profile', authenticate, (req, res) => {
+  res.render('profile', { title: 'Profile' });
+});
 
-app.get('/users', (req, res) => {
+app.get('/users', authenticate, (req, res) => {
   res.render('users', { title: 'users' });
 });
-app.get('/suboffice', (req, res) => {
+
+app.get('/suboffice', authenticate, (req, res) => {
   res.render('suboffice', { title: 'sub offices' });
 });
-app.get('/statistics', (req, res) => {
+
+app.get('/statistics', authenticate, (req, res) => {
   res.render('statistics', { title: 'statistics' });
 });
-app.get('/addVendor', (req, res) => {
+
+app.get('/addVendor', authenticate, (req, res) => {
   res.render('addVendor', { title: 'Register vendor' });
 });
+
 
 /*async function hashAndInsert() {
   try {
