@@ -55,22 +55,21 @@
                     <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
                     <p class="text-center small">Enter your Admin ID & Pin to login</p>
                   </div>
- <!-- Admin Login Form -->
- <form class="row g-3 needs-validation" novalidate action="/admin/login" method="POST">
-
+<!-- Admin Login Form -->
+<form class="row g-3 needs-validation" novalidate action="/admin/login" method="POST">
   <div class="col-12">
-    <label for="yourUsername" class="form-label">Admin Id</label>
+    <label for="yourAdminId" class="form-label">Admin ID</label>
     <div class="input-group has-validation">
-      <input type="text" name="username" class="form-control" id="yourUsername" required>
-      <div class="invalid-feedback">Please enter your Admin_id.</div>
+        <input type="text" name="adminId" class="form-control" id="yourAdminId" required>
+        <div class="invalid-feedback">Please enter your Admin ID.</div>
     </div>
-  </div>
+</div>
 
-  <div class="col-12">
-    <label for="yourPassword" class="form-label">Pin</label>
-    <input type="password" name="password" class="form-control" id="yourPassword" required>
-    <div class="invalid-feedback">Please enter your pin!</div>
-  </div>
+<div class="col-12">
+  <label for="yourPin" class="form-label">PIN</label>
+  <input type="password" name="pin" class="form-control" id="yourPin" required>
+  <div class="invalid-feedback">Please enter your PIN!</div>
+</div>
 
   <div class="col-12">
     <div class="form-check">
@@ -85,6 +84,7 @@
     <p class="small mb-0">Don't have an account? <a href="signup">Create an account</a></p>
   </div>
 </form>
+
 
 
                 </div>
