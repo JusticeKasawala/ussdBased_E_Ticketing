@@ -521,6 +521,41 @@ app.post('/admin/change-pin', async (req, res) => {
   }
 });
 
+// Route to handle admin login
+app.post('/admin/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    // Check if username and password are provided
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    // Log request body for debugging
+    console.log('Request Body:', req.body);
+
+    // Check if the admin exists
+    const admin = await db.query('SELECT * FROM admin WHERE username = $1', [username]);
+    console.log('Admin Query Result:', admin.rows); // Log the query result for debugging
+
+    if (!admin.rows.length) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Compare the provided password with the stored hash
+    const isMatch = await bcrypt.compare(password, admin.rows[0].password_hash);
+    console.log('Password Match:', isMatch); // Log the password match result for debugging
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Incorrect password' });
+    }
+
+    res.status(200).json({ message: 'Admin logged in successfully' });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.get('/statistics', async (req, res) => {
   try {
