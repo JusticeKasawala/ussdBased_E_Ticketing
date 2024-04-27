@@ -86,7 +86,7 @@ function authenticate(req, res, next) {
     next();
   } else {
     // User is not authenticated, redirect to login page or show an error
-    res.redirect('/login'); // Redirect to your login page
+    res.redirect('/'); // Redirect to your login page
   }
 }
 
