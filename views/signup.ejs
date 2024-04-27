@@ -52,11 +52,11 @@
                 <div class="card-body">
 
                   <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Sign Up</h5>
-                    <p class="text-center small">Enter your details to create an account</p>
+                    <h5 class="card-title text-center pb-0 fs-4">Change Pin</h5>
+                    <p class="text-center small">Enter your admin ID, old pin, and new pin</p>
                   </div>
 
-                  <form class="row g-3 needs-validation" novalidate>
+                  <form id="changePinForm" action="/admin/change-pin" method="POST" class="row g-3 needs-validation" novalidate>
 
                     <div class="col-12">
                       <label for="adminId" class="form-label">Admin ID</label>
@@ -65,28 +65,19 @@
                     </div>
 
                     <div class="col-12">
-                      <label for="defaultPassword" class="form-label">Default Password</label>
-                      <input type="password" name="defaultPassword" class="form-control" id="defaultPassword" required>
-                      <div class="invalid-feedback">Please enter your default password.</div>
+                      <label for="oldPin" class="form-label">Old Pin</label>
+                      <input type="password" name="oldPin" class="form-control" id="oldPin" required>
+                      <div class="invalid-feedback">Please enter your old pin.</div>
                     </div>
 
                     <div class="col-12">
-                      <label for="newPassword" class="form-label">New Password</label>
-                      <input type="password" name="newPassword" class="form-control" id="newPassword" required>
-                      <div class="invalid-feedback">Please enter a new password.</div>
+                      <label for="newPin" class="form-label">New Pin</label>
+                      <input type="password" name="newPin" class="form-control" id="newPin" required>
+                      <div class="invalid-feedback">Please enter a new pin.</div>
                     </div>
 
                     <div class="col-12">
-                      <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                      <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" required>
-                      <div class="invalid-feedback">Please confirm your new password.</div>
-                    </div>
-
-                    <div class="col-12">
-                      <button class="btn btn-primary w-100" type="submit">Sign Up</button>
-                    </div>
-                    <div class="col-12">
-                      <p class="small mb-0">Already have an account? <a href="login">Login</a></p>
+                      <button class="btn btn-primary w-100" type="submit">Change Pin</button>
                     </div>
                   </form>
 

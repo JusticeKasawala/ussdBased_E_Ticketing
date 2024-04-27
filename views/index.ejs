@@ -228,7 +228,7 @@
               <hr class="dropdown-divider">
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center" id="openAdminAuthForm" href="#">
+              <a class="dropdown-item d-flex align-items-center"  href="register">
                 <i class="bi bi-person-plus"></i>
                 <span>Add admin</span>
               </a>
@@ -265,22 +265,7 @@
           </ul>
           <!-- End Dropdown Menu -->
         
-          <!-- Admin Authentication Form (Initially hidden) -->
-          <div id="adminAuthForm" style="display: none;">
-            <h2>Admin Authentication</h2>
-            <form id="adminAuthFormContent">
-              <div class="form-group">
-                <label for="admin_id">Admin ID:</label>
-                <input type="text" id="admin_id" name="admin_id" required />
-              </div>
-              <div class="form-group">
-                <label for="admin_pin">Admin PIN:</label>
-                <input type="password" id="admin_pin" name="admin_pin" required />
-              </div>
-              <button type="submit">Authenticate</button>
-            </form>
-          </div>
-          <!-- End Admin Authentication Form -->
+         
         </li>
         <!-- End Profile Nav -->
         
@@ -407,7 +392,22 @@
           <span>Profile</span>
         </a>
       </li><!-- End Profile Page Nav -->
-
+<!-- Admin Authentication Form (Initially hidden) -->
+<div id="adminAuthForm" style="display: none;">
+  <h2>Admin Authentication</h2>
+  <form id="adminAuthFormContent">
+    <div class="form-group">
+      <label for="admin_id">Admin ID:</label>
+      <input type="text" id="admin_id" name="admin_id" required />
+    </div>
+    <div class="form-group">
+      <label for="admin_pin">Admin PIN:</label>
+      <input type="password" id="admin_pin" name="admin_pin" required />
+    </div>
+    <button type="submit">Authenticate</button>
+  </form>
+</div>
+<!-- End Admin Authentication Form -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="contact">
           <i class="bi bi-envelope"></i>
@@ -416,7 +416,7 @@
       </li><!-- End Contact Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="addVendor">
+        <a class="nav-link collapsed" id="openAdminAuthForm" href="#">
           <i class="bi bi-card-list"></i>
           <span>Register Vendor</span>
         </a>
@@ -430,13 +430,16 @@
       </li><!-- End Login Page Nav -->
 
          </ul>
-
+ 
   </aside><!-- End Sidebar-->
+  
 
   <main id="main" class="main">
+    
 
     <div class="pagetitle">
       <h1>E-Ticketing Admin Dashboard</h1>
+      
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index">Home</a></li>
@@ -998,7 +1001,7 @@
          data: { admin_id, admin_pin },
          success: function(response) {
            // Authentication successful, redirect to the registration form
-           window.location.href = "/register";
+           window.location.href = "/addVendor";
          },
          error: function(xhr, status, error) {
            // Display an error message if authentication fails

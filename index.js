@@ -76,15 +76,7 @@ app.post('/authenticate-admin', authenticateAdmin, (req, res) => {
   res.status(200).json({ success: true, message: "Admin authenticated" });
 });
 
-// Route for rendering the register form (assuming you're using a template engine like EJS)
-app.get('/register', (req, res) => {
-  // Check if admin is authenticated before rendering the register form
-  if (req.session.admin_id) {
-    res.render('register', { title: 'Register' });
-  } else {
-    res.status(403).json({ success: false, message: "You are not authorized to access this page" });
-  }
-});
+
 
 app.use("/", ussdRouter(app, io)); // Make sure to place this after the authentication middleware and session setup
 
@@ -102,6 +94,9 @@ app.get('/signup', (req, res) => {
 });
 app.get('/profile', (req, res) => {
   res.render('profile', { title: 'Profile' });
+});
+app.get('/register', (req, res) => {
+  res.render('register', { title: 'register' });
 });
 
 
@@ -487,19 +482,45 @@ app.get("/admin-list-data", async (req, res) => {
 
 
 
-// Define the Express endpoint to handle the admin list data request
-app.get("/admin-list-data", async (req, res) => {
-  try {
-    // Call the getAdminListData function to fetch admin data
-    const adminData = await getAdminListData();
+// Route to handle changing admin's pin
+app.post('/admin/change-pin', async (req, res) => {
+  const { adminId, oldPin, newPin } = req.body;
 
-    // Send the fetched admin data as JSON response
-    res.json({ success: true, data: adminData });
+  try {
+  
+
+    // Check if adminId, oldPin, and newPin are present in the request body
+    if (!adminId || !oldPin || !newPin) {
+      return res.status(400).json({ error: 'Admin ID, old pin, and new pin are required' });
+    }
+
+    // Check if the admin exists
+    const admin = await db.query('SELECT * FROM admin WHERE admin_id = $1', [adminId]);
+  
+    if (!admin.rows.length) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Check if the old pin matches the stored hash
+    const isMatch = await bcrypt.compare(oldPin, admin.rows[0].pin_hash);
+  
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Incorrect old pin' });
+    }
+
+    // Hash the new pin
+    const pinHash = await bcrypt.hash(newPin, saltRounds);
+
+    // Update the admin's pin in the database
+    await db.query('UPDATE admin SET pin_hash = $1 WHERE admin_id = $2', [pinHash, adminId]);
+
+    res.status(200).json({ message: 'Pin updated successfully' });
   } catch (error) {
-    console.error("Error fetching admin data:", error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    console.error('Error changing pin:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.get('/statistics', async (req, res) => {
   try {
