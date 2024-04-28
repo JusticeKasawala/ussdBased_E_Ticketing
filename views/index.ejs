@@ -977,6 +977,9 @@
  <script src="../assets/js/custom.js"></script>
 
  <script>
+   function redirectToSuboffice(suboffice) {
+    window.location.href = `suboffice?suboffice=${suboffice}`;
+  }
    $(document).ready(function() {
      // Handle click event to open the admin authentication form
      $("#openAdminAuthForm").click(function(e) {

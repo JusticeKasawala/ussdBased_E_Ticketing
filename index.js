@@ -15,6 +15,7 @@ const port = 3000;
 const saltRounds = 10; 
 const socketIO = require("socket.io");
 const io = socketIO(server);
+
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -79,7 +80,7 @@ app.post('/authenticate-admin', authenticateAdmin, (req, res) => {
 
 
 
-app.use("/", ussdRouter(app, io)); 
+ 
 function authenticate(req, res, next) {
   if (req.session && req.session.adminId) {
     // User is authenticated, allow access to the next middleware or route handler
@@ -96,6 +97,10 @@ app.get('/', (req, res) => {
 });
 app.get('/login', (req, res) => {
   res.render('index', { title: 'Home Page' });
+  
+});
+app.get('/signup', (req, res) => {
+  res.render('signup', { title: 'sign up page' });
   
 });
 app.get('/register', (req, res) => {
@@ -125,7 +130,7 @@ app.get('/addVendor', authenticate, (req, res) => {
   res.render('addVendor', { title: 'Register vendor' });
 });
 
-
+app.use("/", ussdRouter(app, io));
 /*async function hashAndInsert() {
   try {
     // Hash the password "1234" with bcrypt
