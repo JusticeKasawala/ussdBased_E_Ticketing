@@ -5,15 +5,18 @@ const http = require("http").Server(express);
 const io = require("socket.io")(http);
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+//{"success":true,"message":"User registered successfully","userId":5,"pin":7160}
 const twilio = require('twilio');
-
+const Nexmo = require('nexmo');
 module.exports = function (pool) {
-  // Configure Twilio client
-  const accountSid = 'ACe76f5122e71fc5524de4f998a1ac811c';
-  const authToken = 'ad6cb6eda30ba93e80f2cdfa902df163';
-  const twilioClient = twilio(accountSid, authToken);
+  // Configure Vonage client
+  
+  const nexmo= new Nexmo({
+    apiKey: "4aab9303",
+    apiSecret: "2jVuB4fjvEhPp5gR"
+  })
 
-  const twilioPhoneNumber = '+12622879869'; // Example Twilio phone number, replace with your actual Twilio phone number
+const vonagePhoneNumber = "Vonage APIs";  
 
   router.post("/", async (req, res) => {
     const { sessionId, serviceCode, phoneNumber, text } = req.body;
@@ -96,18 +99,22 @@ module.exports = function (pool) {
             io.emit("paymentUpdate", paymentUpdateData);
 
             // Send a message using Twilio after successful payment
-            const messageBody = `Payment of K${paymentAmount} for serial number ${serialNumber} successful. Thank you!`;
+             // Send a message using Vonage after successful payment
+          const messageBody = `Payment of K${paymentAmount} for serial number ${serialNumber} successful. Thank you!`;
 
-            twilioClient.messages
-              .create({
-                body: messageBody,
-                from: twilioPhoneNumber,
-                to: '+265992834962' // Update this with the recipient's phone number
-              })
-              .then(message => console.log('Twilio message sent:', message.sid))
-              .catch(error => console.error('Error sending Twilio message:', error));
+          nexmo.message.sendSms(vonagePhoneNumber, '265992834962',messageBody, (err, responseData) => {
+            if (err) {
+              console.log('Error sending Vonage SMS:', err);
+            } else {
+              if (responseData.messages[0].status === "0") {
+                console.log("Vonage SMS sent successfully:", responseData);
+              } else {
+                console.log(`Vonage SMS failed with status: ${responseData.messages[0]['status']}`);
+              }
+            }
+          });
 
-            response = `END ${messageBody}`;
+          response = `END ${messageBody}`;
           } else {
             // Incorrect PIN entered
             response = `END Wrong PIN. Payment canceled.`;
