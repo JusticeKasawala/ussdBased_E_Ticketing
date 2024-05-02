@@ -5,7 +5,16 @@ const http = require("http").Server(express);
 const io = require("socket.io")(http);
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const twilio = require('twilio');
+
 module.exports = function (pool) {
+  // Configure Twilio client
+  const accountSid = 'ACe76f5122e71fc5524de4f998a1ac811c';
+  const authToken = 'ad6cb6eda30ba93e80f2cdfa902df163';
+  const twilioClient = twilio(accountSid, authToken);
+
+  const twilioPhoneNumber = '+12622879869'; // Example Twilio phone number, replace with your actual Twilio phone number
+
   router.post("/", async (req, res) => {
     const { sessionId, serviceCode, phoneNumber, text } = req.body;
     let response = "";
@@ -15,12 +24,11 @@ module.exports = function (pool) {
         response = `CON Welcome to E-Ticketing
             1. My account
             2. Make Payments
-            3.Change pin`;
+            3. Change pin`;
       } else if (text === "1") {
         response = `CON Choose account information you want to view
             1. Account number
             2. Account balance
-           
             `;
       } else if (text === "2") {
         response = `CON Enter your serial number`;
@@ -58,7 +66,6 @@ module.exports = function (pool) {
             [serialNumber]
           );
           const hashedPIN = userResult.rows[0].pin;
-          //const storedPaymentAmount = userResult.rows[0].payment_amount;
 
           // Compare the entered PIN with the stored hashed PIN
           const isPINValid = await bcrypt.compare(enteredPIN, hashedPIN);
@@ -88,7 +95,19 @@ module.exports = function (pool) {
             console.log("Sending payment update:", paymentUpdateData);
             io.emit("paymentUpdate", paymentUpdateData);
 
-            response = `END Payment of K${paymentAmount} for serial number ${serialNumber} successful. Thank you!`;
+            // Send a message using Twilio after successful payment
+            const messageBody = `Payment of K${paymentAmount} for serial number ${serialNumber} successful. Thank you!`;
+
+            twilioClient.messages
+              .create({
+                body: messageBody,
+                from: twilioPhoneNumber,
+                to: '+265992834962' // Update this with the recipient's phone number
+              })
+              .then(message => console.log('Twilio message sent:', message.sid))
+              .catch(error => console.error('Error sending Twilio message:', error));
+
+            response = `END ${messageBody}`;
           } else {
             // Incorrect PIN entered
             response = `END Wrong PIN. Payment canceled.`;
