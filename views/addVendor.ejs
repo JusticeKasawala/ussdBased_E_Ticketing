@@ -409,23 +409,27 @@
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Profile</h1>
+      <h1>Registration Section</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index">Home</a></li>
           <li class="breadcrumb-item">Users</li>
-          <li class="breadcrumb-item active">Profile</li>
+          <li class="breadcrumb-item active">addVendor</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
     <div id="userDetailsContainer"></div>
 
     <div id="registrationForm" >
+      <div id="responseMessage" class="alert alert-success" style="display: none;"></div>
+      
         <h1>User Registration</h1>
-        <form action="/register" method="post" class="registration-form">
+        
+        <form id="registration-form" class="registration-form" >
+          
           <div class="form-group">
             <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required />
+            <input type="text" id="full_name" name="full_name" required />
           </div>
           <div class="form-group">
             <label for="registration_district_name">Markert Sub Office:</label>
@@ -499,8 +503,69 @@
 
 </body>
 <script>
-  function redirectToSuboffice(suboffice) {
-    window.location.href = `suboffice?suboffice=${suboffice}`;
-  }
+  document.getElementById('registration-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const fullName = document.getElementById('full_name').value;
+    const districtName = document.getElementById('registration_district_name').value;
+    const marketName = document.getElementById('registration_market_name').value;
+    const businessDescription = document.getElementById('business_description').value;
+    const marketRowNo = document.getElementById('market_row_no').value;
+    const position = document.getElementById('position').value;
+    const nationalId = document.getElementById('National_Id').value;
+    const neighborName = document.getElementById('neighbor_name').value;
+    const homeDistrict = document.getElementById('home_district').value;
+    const homeVillage = document.getElementById('home_village').value;
+
+    if (!fullName || !districtName || !marketName || !businessDescription || !marketRowNo || !position || !nationalId || !neighborName || !homeDistrict || !homeVillage) {
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = 'Please fill in all fields.';
+      errorElement.style.display = 'block';
+      return;
+    }
+
+    try {
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: fullName,
+          district_name: districtName,
+          market_name: marketName,
+          business_description: businessDescription,
+          market_row_no: marketRowNo,
+          position: position,
+          National_Id: nationalId,
+          neighbor_name: neighborName,
+          home_district: homeDistrict,
+          home_village: homeVillage
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      const data = await response.json(); // Parse the response JSON data
+
+// Display success message and user details
+const responseMessage = document.getElementById('responseMessage');
+responseMessage.innerHTML = `
+  <p>User registered successfully!</p>
+  <p>name: ${data.full_name}</p>
+  <p>User ID: ${data.userId}</p>
+  <p>PIN: ${data.pin}</p>
+`;
+responseMessage.style.display = 'block';
+
+    } catch (error) {
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = 'An error occurred. Please try again later.';
+      errorElement.style.display = 'block';
+    }
+  });
 </script>
+
+
 </html>

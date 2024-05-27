@@ -8,7 +8,7 @@ const db = require("./db");
 const path = require("path");
 const crypto = require('crypto');
 const app = express();
-const paypal = require('paypal-rest-sdk');
+
 const http = require("http");
 const server = http.createServer(app);
 const ussdRouter = require("./ussdRouter");
@@ -455,11 +455,21 @@ app.get("/api/users", async (req, res) => {
 
   try {
     const usersResult = await db.query(`
-    SELECT u.*, m.market_name, my.payment_amount, s.suboffice_name
-    FROM users u
-    JOIN market m ON u.market_name = m.market_name
-    JOIN suboffice s ON m.suboffice_id = s.suboffice_id
-    JOIN my_table my ON u.payment_id = my.payment_id;
+    SELECT 
+    u.*, 
+    m.market_name, 
+    my.payment_amount, 
+    my.payment_status, -- Added payment_status column
+    s.suboffice_name
+FROM 
+    users u
+JOIN 
+    market m ON u.market_name = m.market_name
+JOIN 
+    suboffice s ON m.suboffice_id = s.suboffice_id
+JOIN 
+    my_table my ON u.payment_id = my.payment_id;
+
      
     `);
 

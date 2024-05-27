@@ -116,6 +116,7 @@ await db.query(`
     await db.query(`
       CREATE TABLE IF NOT EXISTS admin (
         admin_id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
         username VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         district_id INT,
@@ -136,5 +137,5 @@ await db.query(`
     console.error('Error creating tables:', error);
   } 
 }
-createTables();
+module.exports = { createTables };
 ;
