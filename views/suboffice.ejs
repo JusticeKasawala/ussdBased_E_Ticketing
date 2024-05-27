@@ -29,7 +29,49 @@
 
   <link href="assets/css/style.css" rel="stylesheet">
 
- 
+ <style>
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table th, .styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table thead tr {
+    background-color:rgb(40, 167, 69);
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:nth-of-type(odd) {
+    background-color: #fcfcfc;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #007bff; /* Primary color */
+}
+
+
+ </style>
 </head>
 
 <body>
@@ -478,44 +520,46 @@
         .then(data => displayTable(data))
         .catch(error => console.error(error));
     }
-
     function displayTable(data) {
-      let table = '<table>';
-      table += `<tr>
-        <th>ID</th>
-        <th>Full Name</th>
-        <th>District Name</th>
-        <th>Market Name</th>
-        <th>Business Description</th>
-        <th>Market Row No</th>
-        <th>Position</th>
-        <th>National ID</th>
-        <th>Neighbor Name</th>
-        <th>Home District</th>
-        <th>Home Village</th>
-        <th>Registration Date</th>
-      </tr>`;
+  let table = '<table class="styled-table">';
+  table += `<thead>
+    <tr>
+      <th>ID</th>
+      <th>Full Name</th>
+      <th>District Name</th>
+      <th>Market Name</th>
+      <th>Business Description</th>
+      <th>Market Row No</th>
+      <th>Position</th>
+      <th>National ID</th>
+      <th>Neighbor Name</th>
+      <th>Home District</th>
+      <th>Home Village</th>
+      <th>Registration Date</th>
+    </tr>
+  </thead>
+  <tbody>`;
 
-      data.forEach(item => {
-        table += `<tr>
-          <td>${item.id}</td>
-          <td>${item.full_name}</td>
-          <td>${item.district_name}</td>
-          <td>${item.market_name}</td>
-          <td>${item.business_description}</td>
-          <td>${item.market_row_no}</td>
-          <td>${item.position}</td>
-          <td>${item.national_id}</td>
-          <td>${item.neighbor_name}</td>
-          <td>${item.home_district}</td>
-          <td>${item.home_village}</td>
-          <td>${item.registration_date}</td>
-        </tr>`;
-      });
+  data.forEach(item => {
+    table += `<tr>
+      <td>${item.id}</td>
+      <td>${item.full_name}</td>
+      <td>${item.district_name}</td>
+      <td>${item.market_name}</td>
+      <td>${item.business_description}</td>
+      <td>${item.market_row_no}</td>
+      <td>${item.position}</td>
+      <td>${item.national_id}</td>
+      <td>${item.neighbor_name}</td>
+      <td>${item.home_district}</td>
+      <td>${item.home_village}</td>
+      <td>${item.registration_date}</td>
+    </tr>`;
+  });
 
-      table += '</table>';
-      document.getElementById('searchResults').innerHTML = table;
-    }
+  table += '</tbody></table>';
+  document.getElementById('searchResults').innerHTML = table;
+}
 
   function redirectToSuboffice(suboffice) {
     window.location.href = `suboffice?suboffice=${suboffice}`;

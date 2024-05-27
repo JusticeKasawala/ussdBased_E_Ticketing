@@ -10,7 +10,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const ussdRouter = require("./ussdRouter");
-require("./migrate");
+//require("./migrate");
 const port = 3000;
 const saltRounds = 10; 
 const socketIO = require("socket.io");
