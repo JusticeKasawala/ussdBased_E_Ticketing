@@ -29,10 +29,15 @@
 
   <link href="assets/css/style.css" rel="stylesheet">
 
- 
+</style>
 </head>
 
 <body>
+  <div id="spinner" class="spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
 
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top d-flex align-items-center">
@@ -229,6 +234,7 @@
             <li>
               <hr class="dropdown-divider">
             </li>
+            
 
             <li>
               <a class="dropdown-item d-flex align-items-center" href="profile">
@@ -414,16 +420,16 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index">Home</a></li>
           <li class="breadcrumb-item">Users</li>
-          <li class="breadcrumb-item active">Profile</li>
+          
         </ol>
       </nav>
     </div><!-- End Page Title -->
     
 
-    <div class="container">
-        <h1>User Details</h1>
-        <table id="userTable" class="table">
-          <thead>
+    <div >
+        <h1 class="text-primary">User Details</h1>
+        <table id="userTable" class="table table-bordered">
+          <thead class="table-success">
             <tr>
               <th>ID</th>
               <th>Full Name</th>
@@ -507,6 +513,9 @@
                 `;
                 userTableBody.appendChild(row);
             });
+               // Hide spinner and show content
+        document.getElementById('spinner').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden')
         })
         .catch(error => console.error('Error fetching users:', error));
 </script>
