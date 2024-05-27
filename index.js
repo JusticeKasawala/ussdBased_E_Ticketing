@@ -1,5 +1,6 @@
 const express = require("express");
 const logger = require('./logger');
+const { createTables } = require("./migrate");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const bodyParser = require("body-parser");
@@ -7,15 +8,17 @@ const db = require("./db");
 const path = require("path");
 const crypto = require('crypto');
 const app = express();
+const paypal = require('paypal-rest-sdk');
 const http = require("http");
 const server = http.createServer(app);
 const ussdRouter = require("./ussdRouter");
-//require("./migrate");
+
 const port = 3000;
 const saltRounds = 10; 
 const socketIO = require("socket.io");
 const io = socketIO(server);
-
+const {createAndCaptureOrder}=require('./payment')
+//id=100,,pin=1234
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -24,6 +27,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "")));
 app.use(express.static(path.join(__dirname, 'assets')));
+app.use(bodyParser.json());
 
 // Session middleware
 const generateSessionSecret = () => {
@@ -36,21 +40,22 @@ app.use(session({ secret: generateSessionSecret(), resave: true, saveUninitializ
 // Authentication middleware
 const authenticateAdmin = async (req, res, next) => {
   try {
-    const { admin_id, admin_pin } = req.body;
+    const { email, admin_pin } = req.body;
+   
 
-    if (!admin_id || !admin_pin) {
-      return res.status(400).json({ success: false, message: "Admin ID and PIN are required" });
+    if (!email || !admin_pin) {
+      return res.status(400).json({ success: false, message: "email and PIN are required" });
     }
 
     // Retrieve the hashed PIN from the database based on the provided Admin ID
     const adminQuery = `
-      SELECT admin_id, pin_hash FROM admin
-      WHERE admin_id = $1;
+      SELECT email, pin_hash FROM admin
+      WHERE email = $1;
     `;
-    const adminResult = await db.query(adminQuery, [admin_id]);
+    const adminResult = await db.query(adminQuery, [email]);
 
     if (adminResult.rows.length === 0) {
-      return res.status(400).json({ success: false, message: "Admin ID not found" });
+      return res.status(400).json({ success: false, message: "Admin email not found" });
     }
 
     const { pin_hash } = adminResult.rows[0];
@@ -63,7 +68,7 @@ const authenticateAdmin = async (req, res, next) => {
     }
 
     // Set admin_id in the session to indicate successful authentication
-    req.session.admin_id = admin_id;
+    req.session.email = email;
 
     // Admin authenticated, proceed to the next middleware or route handler
     next();
@@ -82,11 +87,12 @@ app.post('/authenticate-admin', authenticateAdmin, (req, res) => {
 
  
 function authenticate(req, res, next) {
-  if (req.session && req.session.adminId) {
-    // User is authenticated, allow access to the next middleware or route handler
+  
+  if (req.session && req.session.email) {
+    // User is authenticated
     next();
   } else {
-    // User is not authenticated, redirect to login page or show an error
+    
     res.redirect('/'); // Redirect to your login page
   }
 }
@@ -106,7 +112,7 @@ app.get('/signup', (req, res) => {
 app.get('/register', (req, res) => {
   res.render('register', { title: 'register' });
 });
-app.get('/index', authenticate, (req, res) => {
+app.get('/index', (req, res) => {
   res.render('index', { title: 'homepage' });
 });
 
@@ -131,9 +137,19 @@ app.get('/addVendor', authenticate, (req, res) => {
 });
 
 app.use("/", ussdRouter(app, io));
-/*async function hashAndInsert() {
+
+async function hashAndInsert() {
   try {
-    // Hash the password "1234" with bcrypt
+    // Check if the super admin already exists
+    const superAdminCheckQuery = `SELECT * FROM superAdmin WHERE username = 'Justice Kasawala'`;
+    const superAdminCheckResult = await db.query(superAdminCheckQuery);
+
+    if (superAdminCheckResult.rows.length > 0) {
+      console.log('Admin already active.');
+      return;
+    }
+
+    
     const hashedPassword = await bcrypt.hash('1234', 10);
 
     // Insert the hashed password into the superAdmin table
@@ -142,13 +158,14 @@ app.use("/", ussdRouter(app, io));
       VALUES ('Justice Kasawala', $1, 1);
     `, [hashedPassword]);
 
-    console.log('Password hashed and inserted successfully.');
+    console.log('one default superAdmin privillages elevated successfully.');
   } catch (error) {
     console.error('Error:', error.message);
   }
 }
 
-hashAndInsert();*/
+
+
 
 // Middleware to log requests
 app.use((req, res, next) => {
@@ -175,7 +192,8 @@ app.use((req, res, next) => {
 
 // POST endpoint to add an admin
 app.post("/add-admin", async (req, res) => {
-  const { username, password, district_name, market_name } = req.body;
+  const { username, email, password, district_name, market_name } = req.body;
+  console.log(req.body);
 
   try {
     // Generate a default PIN (e.g., a 4-digit random number)
@@ -229,12 +247,13 @@ app.post("/add-admin", async (req, res) => {
 
     // Insert the admin record into the database
     const insertQuery = `
-      INSERT INTO admin (username, password_hash, pin_hash, district_id, suboffice_id, market_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING admin_id, username, pin_hash;
+      INSERT INTO admin (username, email, password_hash, pin_hash, district_id, suboffice_id, market_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING admin_id, username, email, pin_hash;
     `;
     const values = [
       username,
+      email,
       passwordHash,
       pinHash,
       1, // Assuming district_id is not used in admin table
@@ -244,18 +263,132 @@ app.post("/add-admin", async (req, res) => {
     const result = await db.query(insertQuery, values);
 
     // Send a success response with the newly created admin details and default PIN
-    res.status(201).json({ success: true, admin: result.rows[0], defaultPIN });
+    res.status(201).json({
+      success: true,
+      username: username,
+      email: email,
+      defaultPIN: defaultPIN
+    });
+    
   } catch (error) {
     console.error("Error adding admin:", error);
     res.status(500).json({ success: false, message: "Failed to add admin" });
+  }
+});
+app.get('/chartData', async (req, res) => {
+  try {
+    // Fetch dynamic data from the database based on your business logic
+    const salesData = [31, 40, 28, 51, 42, 82, 56]; // Example dynamic data for 'Sales'
+    const ticketsData = [11, 32, 45, 32, 34, 52, 41]; // Example dynamic data for 'Tickets'
+    const vendorsData = [15, 11, 32, 18, 9, 24, 11]; // Example dynamic data for 'Vendors'
+
+    // Format data for ApexCharts
+    const chartData = {
+      categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"],
+      series: [
+        { name: 'Sales', data: salesData },
+        { name: 'Tickets', data: ticketsData },
+        { name: 'Vendors', data: vendorsData }
+      ]
+    };
+
+    res.json(chartData); // Send formatted data as JSON response
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/radarChartData', async (req, res) => {
+  try {
+    // Fetch dynamic data from the database based on your business logic
+    const totalTicketsData = [4200, 3000, 20000, 35000, 50000, 18000]; // Example dynamic data for 'Total Tickets'
+    const soldTicketsData = [5000, 14000, 28000, 26000, 42000, 21000]; // Example dynamic data for 'Sold tickets'
+
+    // Format data for ECharts radar chart
+    const radarChartData = {
+      categories: ['Tickets sold', 'Muluma', 'Likangala', 'Domasi', 'Chingale', 'Namilongo'],
+      totalTicketsData,
+      soldTicketsData,
+    };
+
+    res.json(radarChartData); // Send formatted data as JSON response
+  } catch (error) {
+    console.error('Error fetching radar chart data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
 
 
 
+async function addDefaultAdmin() {
+  try {
+    const adminIdToCheck = 100;
+    const hardcodedPIN = '1234'; 
+    const hardcodedDistrict = 'zomba'; 
+    const hardcodedMarket = 'mponda'; 
+    const hardcodedEmail = 'justicekasawala265@gmail.com'; // Hardcoded email
+
+    // Check if the admin with the specified ID already exists
+    const adminCheckQuery = `
+      SELECT * FROM admin 
+      WHERE admin_id = $1
+    `;
+    const adminCheckResult = await db.query(adminCheckQuery, [adminIdToCheck]);
+
+    if (adminCheckResult.rows.length > 0) {
+      console.log(`Default Admin already exists.`);
+      return;
+    }
+
+    // Hash the hardcoded default PIN using bcrypt
+    const pinHash = await bcrypt.hash(hardcodedPIN, 10); // Use appropriate salt rounds
+
+    // Hash the admin's password using bcrypt
+    const passwordHash = await bcrypt.hash('default_password', 10); // Use appropriate salt rounds
+
+    // Insert the default admin record into the database with hardcoded values
+    const insertQuery = `
+      INSERT INTO admin (admin_id, username, password_hash, pin_hash, district_id, market_id, email)
+      VALUES ($1, 'default_admin', $2, $3, (SELECT suboffice_id FROM suboffice WHERE suboffice_name = $4), (SELECT market_id FROM market WHERE market_name = $5), $6)
+      RETURNING admin_id, username, pin_hash;
+    `;
+    const values = [adminIdToCheck, passwordHash, pinHash, hardcodedDistrict, hardcodedMarket, hardcodedEmail];
+    const result = await db.query(insertQuery, values);
+
+    console.log(`Default admin  added successfully.`);
+    
+  } catch (error) {
+    console.error("Error adding default admin:", error);
+  }
+}
+
+
+
+async function initializeDatabase() {
+  try {
+    // Create database tables first
+    await createTables();
+    
+    // Tables created successfully, proceed to hash and insert data
+    await hashAndInsert();
+    // Call the function to add the default admin
+addDefaultAdmin();
+
+    // Start your Express server or perform other actions here
+    console.log('Database initialization complete.');
+  } catch (error) {
+    // Error occurred during database initialization
+    console.error('Error initializing database:', error);
+  }
+}
+
+// Call the initializeDatabase function to start database initialization
+initializeDatabase();
+
+
 // Get routes
-const DATABASE_NAME = process.env.DB_DATABASE; // Add this line to fetch the database name
+const DATABASE_NAME = process.env.DB_DATABASE; 
 
 app.get("/data", async (req, res) => {
   try {
@@ -286,6 +419,37 @@ app.get("/data", async (req, res) => {
     }
   }
 });
+app.get("/customers-data", async (req, res) => {
+  try {
+    const countQuery = "SELECT COUNT(*) AS userCount FROM users";
+    const result = await db.query(countQuery);
+    console.log("Query Result:", result.rows);
+    const userCount = parseInt(result.rows[0].usercount); // Parse the count as an integer
+    res.json({ userCount });
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
+//total tickets
+
+app.get('/sales-data', async (req, res) => {
+  try {
+    // Fetch the total sales amount from the database
+    const result = await db.query('SELECT SUM(payment_amount) AS total_sales FROM my_table');
+    const totalSales = result.rows[0].total_sales; // Extract the total sales amount
+
+    res.send({ totalSales }); // Send the total sales amount as JSON response
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching data');
+  }
+});
+
 // Get user details for a specific sub office
 app.get("/api/users", async (req, res) => {
 
@@ -363,7 +527,7 @@ app.get("/search", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   const {
-    name,
+    full_name,
     position,
     district_name,
     market_name,
@@ -374,6 +538,7 @@ app.post("/register", async (req, res) => {
     home_district,
     home_village,
   } = req.body;
+  console.log("data Received:", req.body);
 
   try {
     // Generate a 4-digit random PIN
@@ -398,7 +563,7 @@ app.post("/register", async (req, res) => {
     const userIdResult = await db.query(
       "INSERT INTO users (full_name, district_name, market_name, business_description, market_row_no, position, national_id, neighbor_name, home_district, home_village, registration_date, payment_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, $11) RETURNING id",
       [
-        name,
+        full_name,
         district_name,
         market_name,
         business_description,
@@ -423,6 +588,7 @@ app.post("/register", async (req, res) => {
     res.json({
       success: true,
       message: "User registered successfully",
+      full_name,
       userId,
       pin, // Include the PIN in the response for user reference
     });
@@ -542,39 +708,32 @@ app.post('/admin/change-pin', async (req, res) => {
 // Route to handle admin login
 
 app.post('/admin/login', async (req, res) => {
-  const { adminId, pin } = req.body;
+  const { email, pin } = req.body;
+
+  console.log('Received Form Data:', { email, pin });
 
   try {
-    // Check if admin ID and PIN are provided
-    if (!adminId || !pin) {
-      return res.status(400).json({ error: 'Admin ID and PIN are required' });
+    if (!email || !pin) {
+      return res.status(400).json({ message: 'Admin Email and PIN are required' });
     }
 
-    // Check if the admin exists
-    const admin = await db.query('SELECT * FROM admin WHERE admin_id = $1', [adminId]);
+    const admin = await db.query('SELECT * FROM admin WHERE email = $1', [email]);
     if (!admin.rows.length) {
-      return res.status(404).json({ error: 'Admin not found' });
+      return res.status(404).json({ message: 'Admin not found' });
     }
 
-    // Compare the provided PIN with the stored hash
     const isMatch = await bcrypt.compare(pin, admin.rows[0].pin_hash);
     if (!isMatch) {
-      return res.status(400).json({ error: 'Incorrect PIN' });
+      return res.status(400).json({ message: 'Incorrect PIN' });
     }
 
-    // If login is successful, set session or cookies if needed
-    // Example using session:
-    req.session.adminId = adminId;
-
-    // Redirect to homepage (index.ejs)
-    res.redirect('/index'); // Assuming your homepage route is /index
-
+    req.session.email = email;
+    res.status(200).json({ message: 'Login successful' });
   } catch (error) {
     console.error('Error logging in:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 
 app.get('/statistics', async (req, res) => {
@@ -587,8 +746,24 @@ app.get('/statistics', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+//payment
+// Create an Express route to handle incoming requests
+app.post('/create-order', async (req, res) => {
+  try {
+      // Get the purchase_units data from the request body
+      const purchaseUnits = req.body.purchase_units;
 
+      // Call the function to create and capture an order
+      await createAndCaptureOrder(purchaseUnits);
+
+      // Send a success response to the client
+      res.status(200).send({ message: 'Order created and payment captured successfully.' });
+  } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      // Send an error response to the client
+      res.status(500).send({ error: 'Internal server error' });
+  }
+});
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
