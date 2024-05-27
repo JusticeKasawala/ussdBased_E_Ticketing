@@ -397,8 +397,8 @@
   <h2>Admin Authentication</h2>
   <form id="adminAuthFormContent">
     <div class="form-group">
-      <label for="admin_id">Admin ID:</label>
-      <input type="text" id="admin_id" name="admin_id" required />
+      <label for="email">Email:</label>
+      <input type="text" id="email" name="email" required />
     </div>
     <div class="form-group">
       <label for="admin_pin">Admin PIN:</label>
@@ -455,40 +455,38 @@
         <div class="col-lg-8">
           <div class="row">
 
-            <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-6">
-              <div class="card info-card sales-card">
+          <!-- Sales Card -->
+<div class="col-xxl-4 col-md-6">
+  <div class="card info-card sales-card">
+    <div class="card-body">
+      <h5 class="card-title">Sales <span>| Today</span></h5>
+      <div class="d-flex align-items-center">
+        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div class="ps-3">
+          <h6 id="total-sales">Loading...</h6> <!-- Display loading text initially -->
+          <!-- Update the sales figure dynamically using JavaScript -->
+          <script>
+            fetch('/sales-data') // Fetch data from the /sales-data route
+              .then(response => response.json())
+              .then(data => {
+                const totalSalesElement = document.getElementById('total-sales');
+                const totalSalesValue = parseFloat(data.totalSales); // Parse the total sales value as a float
+                if (!isNaN(totalSalesValue)) {
+                  totalSalesElement.textContent = `K${totalSalesValue.toFixed(2)}`; // Update total sales amount
+                } else {
+                  totalSalesElement.textContent = 'N/A'; // Display "N/A" if the total sales value is not a number
+                }
+              })
+              .catch(err => console.error('Error fetching sales data:', err));
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- End Sales Card -->
 
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Sales <span>| Today</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-cart"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>14500</h6>
-                      <span class="text-success small pt-1 fw-bold">14%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div><!-- End Sales Card -->
 
             <!-- Revenue Card -->
             <div class="col-xxl-4 col-md-6">
@@ -512,10 +510,10 @@
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-currency-dollar"></i>
+                      <i class="bi bi-cart"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>K1,232,64.00</h6>
+                      <h6>15</h6>
                       <span class="text-success small pt-1 fw-bold">9%</span> <span class="text-muted small pt-2 ps-1">increase</span>
 
                     </div>
@@ -526,41 +524,33 @@
             </div><!-- End Revenue Card -->
 
             <!-- Customers Card -->
-            <div class="col-xxl-4 col-xl-12">
+<div class="col-xxl-4 col-xl-12">
+  <div class="card info-card customers-card">
+    <div class="card-body">
+      <h5 class="card-title">Vendors <span>| This Year</span></h5>
+      <div class="d-flex align-items-center">
+        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="ps-3">
+          <h6 id="total-users">Loading...</h6> <!-- Display loading text initially -->
+          <!-- Update the user count dynamically using JavaScript -->
+          <script>
+            fetch('/customers-data') // Fetch data from the /customers-data route
+              .then(response => response.json())
+              .then(data => {
+                const totalUsersElement = document.getElementById('total-users');
+                const userCount = data.userCount;
+                totalUsersElement.textContent = userCount || 'N/A'; // Display user count or 'N/A' if count is not available
+              })
+              .catch(err => console.error('Error fetching user count:', err));
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- End Customers Card -->
 
-              <div class="card info-card customers-card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Vendors <span>| This Year</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-people"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>1244</h6>
-                      <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
-
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-            </div><!-- End Customers Card -->
 
             <!-- Reports -->
             <div class="col-12">
@@ -586,56 +576,34 @@
                   <div id="reportsChart"></div>
 
                   <script>
-                    document.addEventListener("DOMContentLoaded", () => {
-                      new ApexCharts(document.querySelector("#reportsChart"), {
-                        series: [{
-                          name: 'Sales',
-                          data: [31, 40, 28, 51, 42, 82, 56],
-                        }, {
-                          name: 'Tickets',
-                          data: [11, 32, 45, 32, 34, 52, 41]
-                        }, {
-                          name: 'Vendors',
-                          data: [15, 11, 32, 18, 9, 24, 11]
-                        }],
-                        chart: {
-                          height: 350,
-                          type: 'area',
-                          toolbar: {
-                            show: false
-                          },
-                        },
-                        markers: {
-                          size: 4
-                        },
-                        colors: ['#4154f1', '#2eca6a', '#ff771d'],
-                        fill: {
-                          type: "gradient",
-                          gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
-                            stops: [0, 90, 100]
-                          }
-                        },
-                        dataLabels: {
-                          enabled: false
-                        },
-                        stroke: {
-                          curve: 'smooth',
-                          width: 2
-                        },
-                        xaxis: {
-                          type: 'datetime',
-                          categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-                        },
-                        tooltip: {
-                          x: {
-                            format: 'dd/MM/yy HH:mm'
-                          },
-                        }
-                      }).render();
-                    });
+          document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await fetch('/chartData');
+    const chartData = await response.json();
+
+    new ApexCharts(document.querySelector("#reportsChart"), {
+      series: chartData.series,
+      chart: {
+        height: 350,
+        type: 'area',
+        toolbar: { show: false },
+      },
+      markers: { size: 4 },
+      colors: ['#4154f1', '#2eca6a', '#ff771d'],
+      fill: {
+        type: "gradient",
+        gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.4, stops: [0, 90, 100] }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      xaxis: { type: 'datetime', categories: chartData.categories },
+      tooltip: { x: { format: 'dd/MM/yy HH:mm' } },
+    }).render();
+  } catch (error) {
+    console.error('Error fetching or rendering chart:', error);
+  }
+});
+
                   </script>
                   <!-- End Line Chart -->
 
@@ -760,54 +728,47 @@
               <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
 
               <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                    legend: {
-                      data: ['Total Tickets', 'Sold tickets']
-                    },
-                    radar: {
-                      // shape: 'circle',
-                      indicator: [{
-                          name: 'Tickets sold',
-                          max: 6500
-                        },
-                        {
-                          name: 'Muluma',
-                          max: 16000
-                        },
-                        {
-                          name: 'Likangala',
-                          max: 30000
-                        },
-                        {
-                          name: 'Domasi',
-                          max: 38000
-                        },
-                        {
-                          name: 'Chingale',
-                          max: 52000
-                        },
-                        {
-                          name: 'Namilongo',
-                          max: 25000
-                        }
-                      ]
-                    },
-                    series: [{
-                      name: 'Total Tickets vs Sold tickets',
-                      type: 'radar',
-                      data: [{
-                          value: [4200, 3000, 20000, 35000, 50000, 18000],
-                          name: 'Total Tickets'
-                        },
-                        {
-                          value: [5000, 14000, 28000, 26000, 42000, 21000],
-                          name: 'Sold tickets'
-                        }
-                      ]
-                    }]
-                  });
-                });
+               document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Fetch dynamic data from the server
+    const response = await fetch('/radarChartData');
+    const radarChartData = await response.json();
+
+    // Initialize ECharts instance for radar chart
+    var radarChart = echarts.init(document.querySelector("#budgetChart"));
+
+    // Set options for the radar chart
+    var options = {
+      legend: {
+        data: ['Total Tickets', 'Sold tickets']
+      },
+      radar: {
+        indicator: [
+          { name: radarChartData.categories[0], max: 6500 },
+          { name: radarChartData.categories[1], max: 16000 },
+          { name: radarChartData.categories[2], max: 30000 },
+          { name: radarChartData.categories[3], max: 38000 },
+          { name: radarChartData.categories[4], max: 52000 },
+          { name: radarChartData.categories[5], max: 25000 }
+        ]
+      },
+      series: [{
+        name: 'Total Tickets vs Sold tickets',
+        type: 'radar',
+        data: [
+          { value: radarChartData.totalTicketsData, name: 'Total Tickets' },
+          { value: radarChartData.soldTicketsData, name: 'Sold tickets' }
+        ]
+      }]
+    };
+
+    // Set options for the radarChart instance
+    radarChart.setOption(options);
+  } catch (error) {
+    console.error('Error fetching or rendering radar chart:', error);
+  }
+});
+
               </script>
 
             </div>
@@ -994,14 +955,14 @@
        e.preventDefault(); // Prevent default form submission
  
        // Get the admin credentials from the form
-       const admin_id = $("#admin_id").val();
+       const email = $("#email").val();
        const admin_pin = $("#admin_pin").val();
  
        // Send a POST request to authenticate the admin
        $.ajax({
          url: "/authenticate-admin",
          type: "POST",
-         data: { admin_id, admin_pin },
+         data: { email, admin_pin },
          success: function(response) {
            // Authentication successful, redirect to the registration form
            window.location.href = "/addVendor";
