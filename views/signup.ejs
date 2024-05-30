@@ -59,9 +59,9 @@
                   <form id="changePinForm" action="/admin/change-pin" method="POST" class="row g-3 needs-validation" novalidate>
 
                     <div class="col-12">
-                      <label for="adminId" class="form-label">Admin ID</label>
-                      <input type="text" name="adminId" class="form-control" id="adminId" required>
-                      <div class="invalid-feedback">Please enter your admin ID.</div>
+                      <label for="email" class="form-label">Email</label>
+                      <input type="text" name="email" class="form-control" id="email" required>
+                      <div class="invalid-feedback">Please enter your Email.</div>
                     </div>
 
                     <div class="col-12">
@@ -84,10 +84,6 @@
                 </div>
               </div>
 
-              <div class="change-password">
-                <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
-              </div>
-
               <div class="credits">
                 <!-- Credits here -->
               </div>
@@ -101,31 +97,7 @@
     </div>
   </main><!-- End #main -->
 
-  <!-- Change Password Modal -->
-  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form>
-            <div class="mb-3">
-              <label for="oldPassword" class="form-label">Old Password</label>
-              <input type="password" class="form-control" id="oldPassword" required>
-            </div>
-            <div class="mb-3">
-              <label for="newPasswordModal" class="form-label">New Password</label>
-              <input type="password" class="form-control" id="newPasswordModal" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- End Change Password Modal -->
+
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

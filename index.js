@@ -678,18 +678,18 @@ app.get("/admin-list-data", async (req, res) => {
 
 // Route to handle changing admin's pin
 app.post('/admin/change-pin', async (req, res) => {
-  const { adminId, oldPin, newPin } = req.body;
+  const { email, oldPin, newPin } = req.body;
 
   try {
   
 
     // Check if adminId, oldPin, and newPin are present in the request body
-    if (!adminId || !oldPin || !newPin) {
-      return res.status(400).json({ error: 'Admin ID, old pin, and new pin are required' });
+    if (!email || !oldPin || !newPin) {
+      return res.status(400).json({ error: 'email, old pin, and new pin are required' });
     }
 
     // Check if the admin exists
-    const admin = await db.query('SELECT * FROM admin WHERE admin_id = $1', [adminId]);
+    const admin = await db.query('SELECT * FROM admin WHERE email = $1', [email]);
   
     if (!admin.rows.length) {
       return res.status(404).json({ error: 'Admin not found' });
@@ -706,7 +706,7 @@ app.post('/admin/change-pin', async (req, res) => {
     const pinHash = await bcrypt.hash(newPin, saltRounds);
 
     // Update the admin's pin in the database
-    await db.query('UPDATE admin SET pin_hash = $1 WHERE admin_id = $2', [pinHash, adminId]);
+    await db.query('UPDATE admin SET pin_hash = $1 WHERE email = $2', [pinHash, email]);
 
     res.status(200).json({ message: 'Pin updated successfully' });
   } catch (error) {
