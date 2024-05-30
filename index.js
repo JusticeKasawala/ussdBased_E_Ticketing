@@ -607,6 +607,91 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
+//delete endpoints
+// Edit endpoint
+app.put('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  const {
+    full_name,
+    position,
+    district_name,
+    market_name,
+    market_row_no,
+    National_Id,
+    business_description,
+    neighbor_name,
+    home_district,
+    home_village,
+  } = req.body;
+
+  try {
+    const updateUserResult = await db.query(
+      "UPDATE users SET full_name = $1, position = $2, district_name = $3, market_name = $4, market_row_no = $5, national_id = $6, business_description = $7, neighbor_name = $8, home_district = $9, home_village = $10 WHERE id = $11 RETURNING *",
+      [
+        full_name,
+        position,
+        district_name,
+        market_name,
+        market_row_no,
+        National_Id,
+        business_description,
+        neighbor_name,
+        home_district,
+        home_village,
+        userId
+      ]
+    );
+
+    if (updateUserResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      user: updateUserResult.rows[0]
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
+// Delete endpoint
+app.delete('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const deleteUserResult = await db.query(
+      "DELETE FROM users WHERE id = $1 RETURNING *",
+      [userId]
+    );
+
+    if (deleteUserResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "User deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
+// Fetch users endpoint (for demonstration)
+app.get('/api/users', async (req, res) => {
+  try {
+    const usersResult = await db.query("SELECT * FROM users");
+    res.json(usersResult.rows);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
 //top markerts
 app.get("/top-markets", async (req, res) => {
   try {
