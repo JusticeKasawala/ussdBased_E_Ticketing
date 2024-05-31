@@ -43,7 +43,7 @@
   <h1>Project Documentation</h1>
 
   <h2>Project Overview</h2>
-  <p>This project is an E-ticketing fourth year computer science web application project built using Node.js and Express.js, designed to streamline E-ticketing collection process through user registrations, generating reports, and visualizing data through various charts. The project includes several features such as user authentication, Ussd integration, admin management, and dynamic data visualization.</p>
+  <p>This project is an E-ticketing fourth year University Of Malawi computer science web based application project built using Node.js and Express.js, designed to streamline E-ticketing collection process through user registrations, generating reports, and visualizing data through various charts. The project includes several features such as user authentication, Ussd integration, admin management, and dynamic data visualization.</p>
 
   <h2>Table of Contents</h2>
   <ul>
