@@ -5,38 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Project Documentation</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 20px;
-    }
-
-    h1,
-    h2 {
-      color: #333;
-    }
-
-    h2 {
-      margin-top: 20px;
-    }
-
-    p {
-      margin-bottom: 10px;
-    }
-
-    ul {
-      list-style-type: disc;
-      margin-bottom: 10px;
-      margin-left: 20px;
-    }
-
-    code {
-      background-color: #f4f4f4;
-      padding: 5px;
-      border-radius: 3px;
-    }
-  </style>
+  
 </head>
 
 <body>
