@@ -1003,6 +1003,26 @@ cron.schedule('0 0 * * 0', async () => { // This will run at midnight on Sunday
     console.error('Error in scheduled task:', error);
   }
 });
+// Endpoint to download the unpaid vendors report
+app.get('/api/unpaid-vendors/report', async (req, res) => {
+  try {
+    const vendors = await getUnpaidVendors();
+
+    // Generate the PDF report
+    const pdfBuffer = await generatePDF(vendors);
+
+    // Set the response headers for downloading the PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="unpaid-vendors-report.pdf"');
+
+    // Send the PDF buffer as the response
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error generating PDF report:', error);
+    res.status(500).json({ error: 'Failed to generate PDF report' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

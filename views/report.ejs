@@ -440,6 +440,7 @@ td .btn {
         <div class="container mt-5">
             <h1>Unpaid Vendors</h1>
             <button id="download-report" class="btn btn-primary mb-3">Download Report</button>
+            <button id="printButton" class="btn btn-primary mb-3" onclick="printReport()">Print Report</button>
             <table class="table">
               <thead>
                 <tr>
@@ -492,6 +493,10 @@ td .btn {
   
   <script src="assets/js/main.js"></script>
   <script>
+       function printReport() {
+  // Call the browser's print function
+  window.print();
+}
     function redirectToSuboffice(suboffice) {
       window.location.href = `suboffice?suboffice=${suboffice}`;
     }
@@ -521,7 +526,7 @@ td .btn {
           });
         })
         .catch(error => console.error('Error fetching unpaid vendors:', error));
-
+     
       // Download report
       document.getElementById('download-report').addEventListener('click', () => {
         window.location.href = '/api/unpaid-vendors/report';
