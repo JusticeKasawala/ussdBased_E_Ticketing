@@ -8,11 +8,13 @@ const db = require("./db");
 const path = require("path");
 const crypto = require('crypto');
 const app = express();
-
+const fs=require('fs');
 const http = require("http");
 const server = http.createServer(app);
 const ussdRouter = require("./ussdRouter");
-
+const nodemailer = require('nodemailer');
+const PDFDocument = require('pdfkit');
+const cron = require('node-cron');
 const port = 3000;
 const saltRounds = 10; 
 const socketIO = require("socket.io");
@@ -857,6 +859,134 @@ app.post('/create-order', async (req, res) => {
       console.error('Error:', error.response ? error.response.data : error.message);
       // Send an error response to the client
       res.status(500).send({ error: 'Internal server error' });
+  }
+});
+// Function to get unpaid vendors from the database
+async function getUnpaidVendors() {
+  try {
+    const result = await db.query(`
+      SELECT 
+        u.id,
+        u.full_name,
+        u.district_name,
+        u.market_name,
+        u.business_description,
+        u.market_row_no,
+        u.position,
+        u.national_id,
+        u.neighbor_name,
+        u.home_district,
+        u.home_village
+      FROM users u
+      JOIN my_table p ON u.payment_id = p.payment_id
+      WHERE p.payment_status != 'paid'
+    `);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching unpaid vendors:', error);
+    throw error;
+  }
+}
+
+function generatePDF(vendors) {
+  try {
+    const doc = new PDFDocument();
+
+    doc.text('Unpaid Vendors', { align: 'center' });
+    doc.moveDown();
+
+    // Table header
+    doc.font('Helvetica-Bold');
+    doc.text('ID', { width: 40, align: 'left' });
+    doc.text('Full Name', { width: 80, align: 'left' });
+    doc.text('District Name', { width: 80, align: 'left' });
+    doc.text('Market Name', { width: 80, align: 'left' });
+    doc.text('Business Description', { width: 120, align: 'left' });
+    doc.text('Market Row No', { width: 80, align: 'left' });
+    doc.text('Position', { width: 80, align: 'left' });
+    doc.text('National ID', { width: 80, align: 'left' });
+    doc.text('Neighbor Name', { width: 80, align: 'left' });
+    doc.text('Home District', { width: 80, align: 'left' });
+    doc.text('Home Village', { width: 80, align: 'left' });
+    doc.moveDown();
+
+    // Reset font to normal
+    doc.font('Helvetica');
+
+    // Table rows
+    vendors.forEach(vendor => {
+      doc.text(vendor.id, { width: 40, align: 'left' });
+      doc.text(vendor.full_name, { width: 80, align: 'left' });
+      doc.text(vendor.district_name, { width: 80, align: 'left' });
+      doc.text(vendor.market_name, { width: 80, align: 'left' });
+      doc.text(vendor.business_description, { width: 120, align: 'left' });
+      doc.text(vendor.market_row_no, { width: 80, align: 'left' });
+      doc.text(vendor.position, { width: 80, align: 'left' });
+      doc.text(vendor.national_id, { width: 80, align: 'left' });
+      doc.text(vendor.neighbor_name, { width: 80, align: 'left' });
+      doc.text(vendor.home_district, { width: 80, align: 'left' });
+      doc.text(vendor.home_village, { width: 80, align: 'left' });
+      doc.moveDown();
+    });
+
+    return doc;
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    throw error;
+  }
+}
+
+async function sendEmail(vendors, pdfData) {
+  try {
+    const mailTransporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailDetails = {
+      from: process.env.EMAIL,
+      to: 'justicekasawala265@gmail.com',
+      subject: 'Weekly Unpaid Vendors Report',
+      text: 'Attached is the PDF report of unpaid vendors for this week.',
+      attachments: [
+        {
+          filename: 'unpaid_vendors.pdf',
+          content: pdfData,
+        },
+      ],
+    };
+
+    const info = await mailTransporter.sendMail(mailDetails);
+    console.log('Email sent successfully:', info.response);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+}
+
+// Schedule task to run every week on Sunday at midnight
+cron.schedule('* * * * * *', async () => {
+  try {
+    const vendors = await getUnpaidVendors();
+    if (vendors.length > 0) {
+      const pdfDoc = generatePDF(vendors);
+      const buffers = [];
+      pdfDoc.on('data', buffers.push.bind(buffers));
+      pdfDoc.on('end', async () => {
+        const pdfData = Buffer.concat(buffers);
+        await sendEmail(vendors, pdfData);
+      });
+      pdfDoc.end();
+    } else {
+      console.log('No unpaid vendors found.');
+    }
+  } catch (error) {
+    console.error('Error in scheduled task:', error);
   }
 });
 app.listen(port, () => {
