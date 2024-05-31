@@ -990,7 +990,7 @@ async function sendEmail(pdfData) {
 }
 
 // Schedule task to run every week on Sunday at midnight
-cron.schedule('0 0 * * 0', async () => { // This will run at midnight on Sunday
+cron.schedule('0 0 * * *', async () => { // This will run at midnight on Sunday
   try {
     const vendors = await getUnpaidVendors();
     if (vendors.length > 0) {
