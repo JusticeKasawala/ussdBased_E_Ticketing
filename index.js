@@ -130,8 +130,8 @@ app.get('/suboffice', authenticate, (req, res) => {
   res.render('suboffice', { title: 'sub offices' });
 });
 
-app.get('/statistics', authenticate, (req, res) => {
-  res.render('statistics', { title: 'statistics' });
+app.get('/report', authenticate, (req, res) => {
+  res.render('report', { title: 'Report' });
 });
 
 app.get('/addVendor', authenticate, (req, res) => {
@@ -862,6 +862,8 @@ app.post('/create-order', async (req, res) => {
   }
 });
 // Function to get unpaid vendors from the database
+
+// Function to get unpaid vendors from the database
 async function getUnpaidVendors() {
   try {
     const result = await db.query(`
@@ -887,56 +889,73 @@ async function getUnpaidVendors() {
     throw error;
   }
 }
-
-function generatePDF(vendors) {
+// Endpoint to get unpaid vendors data
+app.get('/api/unpaid-vendors', async (req, res) => {
   try {
-    const doc = new PDFDocument();
-
-    doc.text('Unpaid Vendors', { align: 'center' });
-    doc.moveDown();
-
-    // Table header
-    doc.font('Helvetica-Bold');
-    doc.text('ID', { width: 40, align: 'left' });
-    doc.text('Full Name', { width: 80, align: 'left' });
-    doc.text('District Name', { width: 80, align: 'left' });
-    doc.text('Market Name', { width: 80, align: 'left' });
-    doc.text('Business Description', { width: 120, align: 'left' });
-    doc.text('Market Row No', { width: 80, align: 'left' });
-    doc.text('Position', { width: 80, align: 'left' });
-    doc.text('National ID', { width: 80, align: 'left' });
-    doc.text('Neighbor Name', { width: 80, align: 'left' });
-    doc.text('Home District', { width: 80, align: 'left' });
-    doc.text('Home Village', { width: 80, align: 'left' });
-    doc.moveDown();
-
-    // Reset font to normal
-    doc.font('Helvetica');
-
-    // Table rows
-    vendors.forEach(vendor => {
-      doc.text(vendor.id, { width: 40, align: 'left' });
-      doc.text(vendor.full_name, { width: 80, align: 'left' });
-      doc.text(vendor.district_name, { width: 80, align: 'left' });
-      doc.text(vendor.market_name, { width: 80, align: 'left' });
-      doc.text(vendor.business_description, { width: 120, align: 'left' });
-      doc.text(vendor.market_row_no, { width: 80, align: 'left' });
-      doc.text(vendor.position, { width: 80, align: 'left' });
-      doc.text(vendor.national_id, { width: 80, align: 'left' });
-      doc.text(vendor.neighbor_name, { width: 80, align: 'left' });
-      doc.text(vendor.home_district, { width: 80, align: 'left' });
-      doc.text(vendor.home_village, { width: 80, align: 'left' });
-      doc.moveDown();
-    });
-
-    return doc;
+    const vendors = await getUnpaidVendors();
+    res.json(vendors);
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw error;
+    res.status(500).json({ error: 'Failed to fetch unpaid vendors' });
   }
+});
+
+// Function to generate PDF report
+function generatePDF(vendors) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const buffers = [];
+
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    try {
+      doc.text('Unpaid Vendors', { align: 'center' });
+      doc.moveDown();
+
+      // Table header
+      const headers = [
+        'ID', 'Full Name', 'District Name', 'Market Name', 'Business Description',
+        'Market Row No', 'Position', 'National ID', 'Neighbor Name', 'Home District',
+        'Home Village'
+      ];
+      const columnWidths = [40, 80, 80, 80, 120, 80, 80, 80, 80, 80, 80];
+
+      let x = doc.page.margins.left;
+      let y = doc.y;
+
+      headers.forEach((header, i) => {
+        doc.text(header, x, y, { width: columnWidths[i], align: 'left' });
+        x += columnWidths[i];
+      });
+      doc.moveDown(1.5);
+
+      // Table rows
+      vendors.forEach(vendor => {
+        x = doc.page.margins.left;
+        y = doc.y;
+
+        [
+          vendor.id, vendor.full_name, vendor.district_name, vendor.market_name,
+          vendor.business_description, vendor.market_row_no, vendor.position,
+          vendor.national_id, vendor.neighbor_name, vendor.home_district, vendor.home_village
+        ].forEach((text, i) => {
+          doc.text(text, x, y, { width: columnWidths[i], align: 'left' });
+          x += columnWidths[i];
+        });
+        doc.moveDown();
+      });
+
+      doc.end();
+    } catch (error) {
+      doc.end();
+      reject(error);
+    }
+  });
 }
 
-async function sendEmail(vendors, pdfData) {
+// Function to send email with PDF attachment
+async function sendEmail(pdfData) {
   try {
     const mailTransporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
@@ -957,6 +976,7 @@ async function sendEmail(vendors, pdfData) {
         {
           filename: 'unpaid_vendors.pdf',
           content: pdfData,
+          contentType: 'application/pdf'
         },
       ],
     };
@@ -970,18 +990,12 @@ async function sendEmail(vendors, pdfData) {
 }
 
 // Schedule task to run every week on Sunday at midnight
-cron.schedule('* * * * * *', async () => {
+cron.schedule('0 0 * * 0', async () => { // This will run at midnight on Sunday
   try {
     const vendors = await getUnpaidVendors();
     if (vendors.length > 0) {
-      const pdfDoc = generatePDF(vendors);
-      const buffers = [];
-      pdfDoc.on('data', buffers.push.bind(buffers));
-      pdfDoc.on('end', async () => {
-        const pdfData = Buffer.concat(buffers);
-        await sendEmail(vendors, pdfData);
-      });
-      pdfDoc.end();
+      const pdfData = await generatePDF(vendors); // Wait for PDF generation
+      await sendEmail(pdfData);
     } else {
       console.log('No unpaid vendors found.');
     }
@@ -989,6 +1003,7 @@ cron.schedule('* * * * * *', async () => {
     console.error('Error in scheduled task:', error);
   }
 });
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
