@@ -4,15 +4,16 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Project Documentation</title>
-  
+
+ 
+
 </head>
 
 <body>
   <h1>Project Documentation</h1>
 
   <h2>Project Overview</h2>
-  <p>This project is an E-ticketing fourth year University Of Malawi computer science web based application project built using Node.js and Express.js, designed to streamline E-ticketing collection process through user registrations, generating reports, and visualizing data through various charts. The project includes several features such as user authentication, Ussd integration, admin management, and dynamic data visualization.</p>
+  <p>This project is an E-ticketing fourth year University Of Malawi computer science web-based application project built using Node.js and Express.js, designed to streamline E-ticketing collection process through user registrations, generating reports, and visualizing data through various charts. The project includes several features such as user authentication, Ussd integration, admin management, and dynamic data visualization.</p>
 
   <h2>Table of Contents</h2>
   <ul>
@@ -41,22 +42,67 @@
   <p>Run the application:</p>
   <code>npm start</code>
 
-  <!-- Add more sections as needed -->
-
   <h2 id="dependencies">Dependencies</h2>
-  <p>Express.js: Web framework</p>
-  <p>bcrypt: Password hashing</p>
-  <!-- Add more dependencies -->
+  <ul>
+    <li>Express.js: Web framework</li>
+    <li>bcrypt: Password hashing</li>
+    <li>body-parser: Middleware to parse request bodies</li>
+    <li>crypto: Module for generating secure random strings</li>
+    <li>express-session: Session management</li>
+    <li>fs: File system module</li>
+    <li>http: HTTP server module</li>
+    <li>nodemailer: Email sending</li>
+    <li>pdfkit: PDF generation</li>
+    <li>node-cron: Cron job scheduling</li>
+    <li>socket.io: WebSocket implementation</li>
+  </ul>
 
   <h2 id="environment-variables">Environment Variables</h2>
   <p>The application uses the following environment variables:</p>
   <ul>
     <li>DB_DATABASE: Name of the database</li>
     <li>DB_USER: Database user</li>
-    <!-- Add more environment variables -->
+    <li>DB_PASSWORD: Database password</li>
+    <li>DB_HOST: Database host</li>
+    <li>DB_PORT: Database port</li>
   </ul>
 
-  <!-- Add more sections as needed -->
+  <h2 id="database-initialization">Database Initialization</h2>
+  <p>The database is initialized by creating necessary tables and inserting default admin data. This is handled in initializeDatabase() which calls createTables(), hashAndInsert(), and addDefaultAdmin() functions.</p>
+
+  <h2 id="authentication">Authentication</h2>
+  <p><strong>Admin Authentication:</strong> Admins are authenticated via the /authenticate-admin endpoint. The provided email and PIN are verified against the stored hashed values in the database.</p>
+  <p><strong>User Authentication:</strong> Users are authenticated via session management. The authenticate middleware ensures that users are logged in before accessing protected routes.</p>
+
+  <h2 id="routes">Routes</h2>
+  <p><strong>Public Routes:</strong></p>
+  <ul>
+    <li>/login: Renders the login page</li>
+    <li>/signup: Renders the signup page</li>
+    <li>/register: Renders the registration page</li>
+  </ul>
+  <p><strong>Protected Routes:</strong></p>
+  <ul>
+    <li>/profile: Renders the user profile page</li>
+    <li>/users: Renders the users page</li>
+    <li>/suboffice: Renders the suboffice page</li>
+    <li>/report: Renders the report page</li>
+    <li>/addVendor: Renders the add vendor page</li>
+    <li>/data: Fetches markets and suboffices</li>
+    <li>/customers-data: Fetches the user count</li>
+    <li>/sales-data: Fetches total sales data</li>
+    <li>/api/users: Fetches user details</li>
+    <li>/search: Handles search requests for users by suboffice</li>
+    <li>/chartData: Fetches data for charts</li>
+    <li>/radarChartData: Fetches data for radar charts</li>
+  </ul>
+
+  <h2 id="chart-data">Chart Data</h2>
+  <p>The application provides endpoints to fetch data for various charts:</p>
+  <ul>
+    <li>/chartData: Provides data for sales, tickets, and vendors charts</li>
+    <li>/radarChartData: Provides data for radar charts showing ticket sales across different suboffices</li>
+  </ul>
 
   <h2>Frontend Integration</h2>
   <p>To integrate the report viewing and downloading functionality into the frontend, use the following code snippet in your HTML file:</p>
