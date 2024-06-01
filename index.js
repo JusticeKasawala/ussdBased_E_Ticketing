@@ -16,15 +16,17 @@ const nodemailer = require('nodemailer');
 const PDFDocument = require('pdfkit');
 const cron = require('node-cron');
 const port = 3000;
+const multer = require('multer');
 const saltRounds = 10; 
 const socketIO = require("socket.io");
 const io = socketIO(server);
 const {createAndCaptureOrder}=require('./payment')
-//id=100,,pin=1234
+const { check, validationResult } = require('express-validator');
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "")));
@@ -117,6 +119,10 @@ app.get('/register', (req, res) => {
 app.get('/index', (req, res) => {
   res.render('index', { title: 'homepage' });
 });
+app.get('/contact',authenticate,(req,res)=>{
+  res.render('contact',{ errors : '' })
+
+})
 
 app.get('/profile', authenticate, (req, res) => {
   res.render('profile', { title: 'Profile' });
@@ -990,7 +996,7 @@ async function sendEmail(pdfData) {
 }
 
 // Schedule task to run every week on Sunday at midnight
-cron.schedule('0 0 * * *', async () => { // This will run at midnight on Sunday
+cron.schedule('0 0 * * *', async () => { 
   try {
     const vendors = await getUnpaidVendors();
     if (vendors.length > 0) {
@@ -1021,6 +1027,72 @@ app.get('/api/unpaid-vendors/report', async (req, res) => {
     console.error('Error generating PDF report:', error);
     res.status(500).json({ error: 'Failed to generate PDF report' });
   }
+});
+
+app.post('/send', 
+    upload.single('attachment'),
+    [
+        check('email').isEmail().withMessage('Invalid Email Address'),
+        check('subject').notEmpty().withMessage('Subject is required'),
+        check('message').notEmpty().withMessage('Message is required')
+    ], 
+    async (request, response) => {
+
+    const errors = validationResult(request);
+
+    if (!errors.isEmpty()) {
+        response.render('contact', { errors: errors.mapped() });
+    } else {
+        const { email, subject, message } = request.body;
+        const attachment = request.file;
+
+        async function sendEmail() {
+            try {
+                const mailTransporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false, // true for 465, false for other ports
+                    auth: {
+                        user: process.env.EMAIL,
+                        pass: process.env.EMAIL_PASSWORD,
+                    },
+                });
+
+                const mailDetails = {
+                    from: process.env.EMAIL, // Sender's email address from environment variable
+                    to: email, // Recipient's email address from form input
+                    subject: subject,
+                    text: message,
+                    attachments: []
+                };
+
+                if (attachment) {
+                    mailDetails.attachments.push({
+                        filename: attachment.originalname,
+                        content: attachment.buffer,
+                        contentType: attachment.mimetype
+                    });
+                }
+
+                const info = await mailTransporter.sendMail(mailDetails);
+                console.log('Email sent successfully:', info.response);
+                response.redirect('/success');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                response.redirect('/error'); // Redirect to an error page if needed
+            }
+        }
+
+        await sendEmail();
+    }
+});
+
+app.get('/success', (request, response) => {
+    response.send('<h1>Your Message was Successfully Sent!</h1>');
+});
+
+app.get('/error', (request, response) => {
+    response.send('<h1>There was an error sending your message. Please try again later.</h1>');
 });
 
 
