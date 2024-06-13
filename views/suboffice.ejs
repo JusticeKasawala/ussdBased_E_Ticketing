@@ -71,6 +71,15 @@
     color: #007bff; /* Primary color */
 }
 
+#searchInput{
+	width: 80%;
+}
+
+#searchButton{
+	width: 10%;
+  height: 40px;
+  border-radius: 5px;
+}
 
  </style>
 </head>
@@ -465,7 +474,6 @@
     <h1>Search Users by Suboffice</h1>
 <div id="searchBar">
   <i class="fa fa-search"></i>
-  <label for="searchInput">Search:</label>
   <input type="text" id="searchInput" placeholder="Enter name or User ID" />
   <button id="searchButton">Search</button>
 </div>
@@ -522,7 +530,7 @@
         .catch(error => console.error(error));
     }
     function displayTable(data) {
-  let table = '<table class="styled-table tb-success">';
+  let table = '<table class="styled-table tb-success table-bordered" >';
   table += `<thead thead-success>
     <tr>
       <th>ID</th>
