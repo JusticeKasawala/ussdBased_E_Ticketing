@@ -5,7 +5,11 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
+<<<<<<< HEAD
   <title>E-ticketing/suboffice</title>
+=======
+  <title>Route / account -E-ticketing</title>
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -29,6 +33,7 @@
 
   <link href="assets/css/style.css" rel="stylesheet">
 
+<<<<<<< HEAD
  
   <style>
     .styled-table {
@@ -83,6 +88,61 @@
   }
   
    </style>
+=======
+ <style>
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table th, .styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table thead tr {
+ 
+
+    text-align: left;
+    background-color: #d1e7dd;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:nth-of-type(odd) {
+    background-color: #fcfcfc;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #007bff; /* Primary color */
+}
+
+#searchInput{
+	width: 80%;
+}
+
+#searchButton{
+	width: 10%;
+  height: 40px;
+  border-radius: 5px;
+}
+
+ </style>
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 </head>
 
 <body>
@@ -387,7 +447,23 @@
         </ul>
       </li><!-- End Forms Nav -->
 
+<<<<<<< HEAD
       
+=======
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-layout-text-window-reverse"></i><span>Statistics</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="statistics">
+              <i class="bi bi-circle"></i><span>payment statistics</span>
+            </a>
+          </li>
+         
+        </ul>
+      </li><!-- End Tables Nav -->
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
@@ -437,7 +513,11 @@
       </li><!-- End Register Page Nav -->
 
       <li class="nav-item">
+<<<<<<< HEAD
         <a class="nav-link collapsed" href="/">
+=======
+        <a class="nav-link collapsed" href="login">
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
           <i class="bi bi-box-arrow-in-left"></i>
           <span>Logout</span>
         </a>
@@ -463,7 +543,10 @@
     <h1>Search Users by Suboffice</h1>
 <div id="searchBar">
   <i class="fa fa-search"></i>
+<<<<<<< HEAD
   <label for="searchInput">Search:</label>
+=======
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
   <input type="text" id="searchInput" placeholder="Enter name or User ID" />
   <button id="searchButton">Search</button>
 </div>
@@ -520,7 +603,11 @@
         .catch(error => console.error(error));
     }
     function displayTable(data) {
+<<<<<<< HEAD
   let table = '<table class="styled-table tb-success table-bordered">';
+=======
+  let table = '<table class="styled-table tb-success table-bordered" >';
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
   table += `<thead thead-success>
     <tr>
       <th>ID</th>

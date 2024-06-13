@@ -123,6 +123,7 @@ app.get('/contact',authenticate,(req,res)=>{
   res.render('contact',{ errors : '' })
 
 })
+<<<<<<< HEAD
 app.get('/charts',authenticate,(req,res)=>{
   res.render('charts',{ errors : '' })
 
@@ -139,6 +140,9 @@ app.get('/barGraphData', (req, res) => {
     payments: [5, 7, 8, 9, 10, 11]
   });
 });
+=======
+
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 app.get('/profile', authenticate, (req, res) => {
   res.render('profile', { title: 'Profile' });
 });
@@ -350,7 +354,11 @@ async function addDefaultAdmin() {
     const hardcodedPIN = '1234'; 
     const hardcodedDistrict = 'zomba'; 
     const hardcodedMarket = 'mponda'; 
+<<<<<<< HEAD
     const hardcodedEmail = 'justicekasawala265@gmail.com'; 
+=======
+    const hardcodedEmail = 'justicekasawala265@gmail.com'; // Hardcoded email
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 
     // Check if the admin with the specified ID already exists
     const adminCheckQuery = `
@@ -571,7 +579,11 @@ app.post("/register", async (req, res) => {
     home_district,
     home_village,
   } = req.body;
+<<<<<<< HEAD
  
+=======
+  console.log("data Received:", req.body);
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 
   try {
     // Generate a 4-digit random PIN
@@ -685,6 +697,7 @@ app.delete('/api/users/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
+<<<<<<< HEAD
     // Start a transaction
     await db.query('BEGIN');
 
@@ -702,11 +715,14 @@ app.delete('/api/users/:id', async (req, res) => {
     const paymentId = userResult.rows[0].payment_id;
 
     // Delete the user from the users table
+=======
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
     const deleteUserResult = await db.query(
       "DELETE FROM users WHERE id = $1 RETURNING *",
       [userId]
     );
 
+<<<<<<< HEAD
     // Delete the associated record from the my_table table
     await db.query(
       "DELETE FROM my_table WHERE payment_id = $1",
@@ -723,12 +739,26 @@ app.delete('/api/users/:id', async (req, res) => {
   } catch (error) {
     // Rollback the transaction in case of an error
     await db.query('ROLLBACK');
+=======
+    if (deleteUserResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "User deleted successfully"
+    });
+  } catch (error) {
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
     console.error("Error deleting user:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
 // Fetch users endpoint (for demonstration)
 app.get('/api/users', async (req, res) => {
   try {
@@ -1099,8 +1129,13 @@ app.post('/send',
                 });
 
                 const mailDetails = {
+<<<<<<< HEAD
                     from: process.env.EMAIL,
                     to: email, 
+=======
+                    from: process.env.EMAIL, // Sender's email address from environment variable
+                    to: email, // Recipient's email address from form input
+>>>>>>> 6a82f1a8484ee884fee1a0c81176670316d3d149
                     subject: subject,
                     text: message,
                     attachments: []
