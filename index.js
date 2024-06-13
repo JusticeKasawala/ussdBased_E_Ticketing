@@ -123,7 +123,22 @@ app.get('/contact',authenticate,(req,res)=>{
   res.render('contact',{ errors : '' })
 
 })
+app.get('/charts',authenticate,(req,res)=>{
+  res.render('charts',{ errors : '' })
 
+})
+app.get('/salesLineChartData', (req, res) => {
+  res.json({
+    dates: ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'],
+    sales: [120, 200, 150, 80, 70]
+  });
+});
+
+app.get('/barGraphData', (req, res) => {
+  res.json({
+    payments: [5, 7, 8, 9, 10, 11]
+  });
+});
 app.get('/profile', authenticate, (req, res) => {
   res.render('profile', { title: 'Profile' });
 });
@@ -335,7 +350,7 @@ async function addDefaultAdmin() {
     const hardcodedPIN = '1234'; 
     const hardcodedDistrict = 'zomba'; 
     const hardcodedMarket = 'mponda'; 
-    const hardcodedEmail = 'justicekasawala265@gmail.com'; // Hardcoded email
+    const hardcodedEmail = 'justicekasawala265@gmail.com'; 
 
     // Check if the admin with the specified ID already exists
     const adminCheckQuery = `
@@ -556,7 +571,7 @@ app.post("/register", async (req, res) => {
     home_district,
     home_village,
   } = req.body;
-  console.log("data Received:", req.body);
+ 
 
   try {
     // Generate a 4-digit random PIN
@@ -670,24 +685,49 @@ app.delete('/api/users/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
+    // Start a transaction
+    await db.query('BEGIN');
+
+    // Retrieve the payment_id associated with the user
+    const userResult = await db.query(
+      "SELECT payment_id FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const paymentId = userResult.rows[0].payment_id;
+
+    // Delete the user from the users table
     const deleteUserResult = await db.query(
       "DELETE FROM users WHERE id = $1 RETURNING *",
       [userId]
     );
 
-    if (deleteUserResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    // Delete the associated record from the my_table table
+    await db.query(
+      "DELETE FROM my_table WHERE payment_id = $1",
+      [paymentId]
+    );
+
+    // Commit the transaction
+    await db.query('COMMIT');
 
     res.json({
       success: true,
-      message: "User deleted successfully"
+      message: "User and related details deleted successfully"
     });
   } catch (error) {
+    // Rollback the transaction in case of an error
+    await db.query('ROLLBACK');
     console.error("Error deleting user:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
+
 
 // Fetch users endpoint (for demonstration)
 app.get('/api/users', async (req, res) => {
@@ -1059,8 +1099,8 @@ app.post('/send',
                 });
 
                 const mailDetails = {
-                    from: process.env.EMAIL, // Sender's email address from environment variable
-                    to: email, // Recipient's email address from form input
+                    from: process.env.EMAIL,
+                    to: email, 
                     subject: subject,
                     text: message,
                     attachments: []
