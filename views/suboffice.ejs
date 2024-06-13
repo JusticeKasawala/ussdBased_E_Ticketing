@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Route / account -E-ticketing</title>
+  <title>E-ticketing/suboffice</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -29,49 +29,60 @@
 
   <link href="assets/css/style.css" rel="stylesheet">
 
- <style>
-  .styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 25px 0;
-    font-size: 18px;
-    text-align: left;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-}
-
-.styled-table th, .styled-table td {
-    padding: 12px 15px;
-}
-
-.styled-table thead tr {
  
-
-    text-align: left;
-}
-
-.styled-table tbody tr {
-    border-bottom: 1px solid #dddddd;
-}
-
-.styled-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
-}
-
-.styled-table tbody tr:nth-of-type(odd) {
-    background-color: #fcfcfc;
-}
-
-.styled-table tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-.styled-table tbody tr.active-row {
-    font-weight: bold;
-    color: #007bff; /* Primary color */
-}
-
-
- </style>
+  <style>
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 25px 0;
+      font-size: 18px;
+      text-align: left;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .styled-table th, .styled-table td {
+      padding: 12px 15px;
+  }
+  
+  .styled-table thead tr {
+   
+  
+      text-align: left;
+      background-color: #d1e7dd;
+  }
+  
+  .styled-table tbody tr {
+      border-bottom: 1px solid #dddddd;
+  }
+  
+  .styled-table tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+  }
+  
+  .styled-table tbody tr:nth-of-type(odd) {
+      background-color: #fcfcfc;
+  }
+  
+  .styled-table tbody tr:hover {
+      background-color: #f1f1f1;
+  }
+  
+  .styled-table tbody tr.active-row {
+      font-weight: bold;
+      color: #007bff; /* Primary color */
+  }
+  
+  #searchInput{
+    width: 80%;
+  }
+  
+  #searchButton{
+    width: 10%;
+    height: 40px;
+    border-radius: 5px;
+  }
+  
+   </style>
 </head>
 
 <body>
@@ -376,19 +387,7 @@
         </ul>
       </li><!-- End Forms Nav -->
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-layout-text-window-reverse"></i><span>Statistics</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="statistics">
-              <i class="bi bi-circle"></i><span>payment statistics</span>
-            </a>
-          </li>
-         
-        </ul>
-      </li><!-- End Tables Nav -->
+      
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
@@ -438,7 +437,7 @@
       </li><!-- End Register Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="login">
+        <a class="nav-link collapsed" href="/">
           <i class="bi bi-box-arrow-in-left"></i>
           <span>Logout</span>
         </a>
@@ -521,7 +520,7 @@
         .catch(error => console.error(error));
     }
     function displayTable(data) {
-  let table = '<table class="styled-table tb-success">';
+  let table = '<table class="styled-table tb-success table-bordered">';
   table += `<thead thead-success>
     <tr>
       <th>ID</th>
